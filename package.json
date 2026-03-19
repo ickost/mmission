@@ -1,0 +1,13 @@
+{
+  "name": "mission-board",
+  "version": "1.0.0",
+  "description": "월간 미션 보드 - 카카오톡 단톡방 미션 공유",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "nanoid": "^3.3.7"
+  }
+}
