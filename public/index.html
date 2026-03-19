@@ -167,14 +167,17 @@ input,textarea,select{font-family:inherit;outline:none}
     <input type="text" id="inp-room" placeholder="단톡방 공용 코드" maxlength="20" autocomplete="off">
   </div>
   <button class="btn-primary" id="btn-enter" onclick="enterRoom()" disabled>입장하기</button>
-  <p class="hint">방 코드가 없으면 새로운 방이 만들어져요.<br>같은 코드를 쓰는 사람끼리 미션을 공유합니다.</p>
+  <p class="hint">방 코드가 없으면 새로운 방이 만들어져요.<br>같은 코드를 쓰는 사람끼리 미션을 공유합니다.<br>초대 링크를 받았다면 링크만 누르면 바로 입장!</p>
 </div>
 
 <!-- BOARD -->
 <div id="board-view" class="container">
   <div class="board-header">
     <span class="room-info" id="room-badge"></span>
-    <button style="font-size:13px;color:var(--sub);padding:6px 12px;border-radius:8px;border:1px solid var(--border)" onclick="logout()">나가기</button>
+    <div style="display:flex;gap:6px">
+      <button style="font-size:13px;color:var(--accent);padding:6px 12px;border-radius:8px;border:1px solid var(--accent-bg);background:var(--accent-bg)" onclick="shareLink()">초대 링크</button>
+      <button style="font-size:13px;color:var(--sub);padding:6px 12px;border-radius:8px;border:1px solid var(--border)" onclick="logout()">나가기</button>
+    </div>
   </div>
 
   <div class="tabs">
@@ -288,17 +291,40 @@ const COLORS = [
 
 let state = { nickname:'', room:'', year:2026, month:4, missions:[], currentTab:'dash' };
 
-// ===== 1) Persistent login via localStorage =====
-const saved = localStorage.getItem('mb_session');
-if (saved) {
-  try { const s = JSON.parse(saved); state.nickname = s.nickname; state.room = s.room; } catch(e) {}
+// ===== 1) Login priority: URL params > localStorage > manual =====
+const urlParams = new URLSearchParams(window.location.search);
+const urlRoom = urlParams.get('room');
+const urlNick = urlParams.get('nick');
+
+if (urlRoom && urlNick) {
+  state.room = urlRoom.trim();
+  state.nickname = urlNick.trim();
+  localStorage.setItem('mb_session', JSON.stringify({ nickname: state.nickname, room: state.room }));
+  // Clean URL without reloading (remove params for cleaner address bar)
+  window.history.replaceState({}, '', window.location.pathname);
+} else {
+  const saved = localStorage.getItem('mb_session');
+  if (saved) {
+    try { const s = JSON.parse(saved); state.nickname = s.nickname; state.room = s.room; } catch(e) {}
+  }
 }
 
 const now = new Date();
 state.year = now.getFullYear();
 state.month = now.getMonth() + 1;
 
-if (state.nickname && state.room) showBoard();
+if (state.nickname && state.room) {
+  // Auto-enter room on server (ensures room exists)
+  fetch('/api/rooms/enter', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ code: state.room, nickname: state.nickname })
+  }).then(() => showBoard()).catch(() => showBoard());
+} else {
+  // Pre-fill input fields if only one param is in URL
+  if (urlRoom) document.getElementById('inp-room').value = urlRoom;
+  if (urlNick) document.getElementById('inp-nick').value = urlNick;
+  validateEntry();
+}
 
 document.getElementById('inp-nick').addEventListener('input', validateEntry);
 document.getElementById('inp-room').addEventListener('input', validateEntry);
@@ -672,6 +698,24 @@ async function deleteMission(id) {
     if (state.currentTab === 'dash') loadDashboard();
     else loadMissions();
   } catch(e) { toast('\uC0AD\uC81C\uC5D0 \uC2E4\uD328\uD588\uC5B4\uC694.'); }
+}
+
+// ===== Share link =====
+function shareLink() {
+  const base = window.location.origin + window.location.pathname;
+  const link = base + '?room=' + encodeURIComponent(state.room);
+  
+  const text = '\uD83C\uDFC3 \uBBF8\uC158\uBCF4\uB4DC \uC785\uC7A5\uD558\uAE30\n' + link + '&nick=\uB2C9\uB124\uC784';
+  
+  if (navigator.share) {
+    navigator.share({ title: '\uBBF8\uC158\uBCF4\uB4DC', text: text }).catch(() => {});
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => {
+      toast('\uCD08\uB300 \uB9C1\uD06C\uAC00 \uBCF5\uC0AC\uB418\uC5C8\uC5B4\uC694! \uCE74\uD1A1\uBC29\uC5D0 \uBD99\uC5EC\uB123\uAE30 \uD558\uC138\uC694.');
+    });
+  } else {
+    prompt('\uC544\uB798 \uB9C1\uD06C\uB97C \uBCF5\uC0AC\uD574\uC11C \uCE74\uD1A1\uBC29\uC5D0 \uACF5\uC720\uD558\uC138\uC694:', text);
+  }
 }
 
 // ===== Helpers =====
