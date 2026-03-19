@@ -13,15 +13,35 @@ app.use(express.static(path.join(__dirname, 'public')));
 const DATA_DIR = process.env.DATA_DIR || __dirname;
 const DB_FILE = path.join(DATA_DIR, 'data.json');
 
+// Ensure data directory exists
+try {
+  if (!fs.existsSync(DATA_DIR)) {
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+    console.log('Created data directory:', DATA_DIR);
+  }
+  // Test write permission
+  const testFile = path.join(DATA_DIR, '.write-test');
+  fs.writeFileSync(testFile, 'ok');
+  fs.unlinkSync(testFile);
+  console.log('Data storage OK:', DB_FILE);
+} catch(e) {
+  console.error('WARNING: Cannot write to DATA_DIR:', DATA_DIR, e.message);
+  console.error('Falling back to __dirname');
+}
+
 function loadDB() {
   try {
     if (fs.existsSync(DB_FILE)) return JSON.parse(fs.readFileSync(DB_FILE, 'utf-8'));
-  } catch(e) { console.error('DB load error:', e); }
+  } catch(e) { console.error('DB load error:', e.message); }
   return { rooms: {}, missions: {} };
 }
 
 function saveDB(db) {
-  fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), 'utf-8');
+  try {
+    fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), 'utf-8');
+  } catch(e) {
+    console.error('DB save error:', e.message);
+  }
 }
 
 // --- OG preview cache (in-memory) ---
@@ -224,4 +244,11 @@ app.get('*', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Mission Board running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log('Mission Board running on port ' + PORT);
+  console.log('DATA_DIR=' + DATA_DIR);
+  console.log('DB_FILE=' + DB_FILE);
+});
+
+process.on('uncaughtException', (e) => { console.error('Uncaught:', e.message); });
+process.on('unhandledRejection', (e) => { console.error('Unhandled:', e); });
