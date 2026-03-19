@@ -18,10 +18,9 @@
 body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;-webkit-font-smoothing:antialiased}
 button{font-family:inherit;cursor:pointer;border:none;background:none}
 input,textarea,select{font-family:inherit;outline:none}
-
 .container{max-width:480px;margin:0 auto;padding:0 20px 40px}
 
-/* Entry Screen */
+/* Entry */
 #entry-view{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100dvh;padding:40px 20px;text-align:center}
 #entry-view .logo{width:72px;height:72px;border-radius:20px;background:var(--accent);display:flex;align-items:center;justify-content:center;margin-bottom:24px}
 #entry-view .logo svg{width:36px;height:36px}
@@ -37,10 +36,17 @@ input,textarea,select{font-family:inherit;outline:none}
 .btn-primary:disabled{opacity:.4;cursor:default}
 #entry-view .hint{font-size:12px;color:var(--hint);margin-top:16px;line-height:1.6}
 
-/* Board View */
+/* Board */
 #board-view{display:none}
-.board-header{display:flex;justify-content:space-between;align-items:center;padding:20px 0 16px;position:sticky;top:0;background:var(--bg);z-index:10}
+.board-header{display:flex;justify-content:space-between;align-items:center;padding:20px 0 12px;position:sticky;top:0;background:var(--bg);z-index:10}
 .board-header .room-info{font-size:12px;color:var(--hint);background:var(--warm);padding:4px 10px;border-radius:20px}
+
+/* Tabs */
+.tabs{display:flex;gap:4px;margin-bottom:20px;background:var(--warm);border-radius:var(--radius-sm);padding:3px}
+.tabs button{flex:1;padding:10px 0;border-radius:8px;font-size:13px;font-weight:500;color:var(--sub);transition:all .2s}
+.tabs button.active{background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+
+/* Month nav */
 .month-nav{display:flex;align-items:center;gap:2px;margin-bottom:20px}
 .month-nav button{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--sub);transition:background .15s}
 .month-nav button:hover{background:var(--warm)}
@@ -54,12 +60,17 @@ input,textarea,select{font-family:inherit;outline:none}
 .stat-card .num{font-size:22px;font-weight:700;color:var(--text)}
 .stat-card .lbl{font-size:11px;color:var(--sub);margin-top:2px}
 
-.mission-list{display:flex;flex-direction:column;gap:12px;padding-bottom:20px}
+.mission-list{display:flex;flex-direction:column;gap:12px;padding-bottom:80px}
 
-.m-card{background:var(--card);border-radius:var(--radius);padding:18px 20px;border:1.5px solid var(--border);transition:border-color .15s,transform .15s}
+/* Section label for dashboard */
+.section-label{font-size:13px;font-weight:700;color:var(--sub);margin:20px 0 10px;display:flex;align-items:center;gap:8px}
+.section-label:first-child{margin-top:0}
+.section-label .line{flex:1;height:1px;background:var(--border)}
+
+/* Mission card */
+.m-card{background:var(--card);border-radius:var(--radius);padding:18px 20px;border:1.5px solid var(--border);transition:border-color .15s}
 .m-card:hover{border-color:#ccc}
 .m-card.past{opacity:.5}
-.m-card .top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
 .m-card .date-row{display:flex;align-items:center;gap:8px;margin-bottom:6px}
 .m-card .date-pill{font-size:12px;font-weight:500;padding:3px 10px;border-radius:8px;background:var(--warm);color:var(--sub)}
 .m-card .dday{font-size:11px;color:var(--accent);font-weight:500}
@@ -83,6 +94,16 @@ input,textarea,select{font-family:inherit;outline:none}
 .m-card .act-btn:hover{background:var(--warm)}
 .m-card .act-btn.del:hover{background:var(--danger-bg);color:var(--danger)}
 
+/* Link preview */
+.link-preview{display:flex;gap:12px;margin-top:10px;padding:10px 12px;background:var(--bg);border-radius:var(--radius-sm);border:1px solid var(--border);text-decoration:none;color:inherit;transition:border-color .15s}
+.link-preview:hover{border-color:#ccc}
+.link-preview .lp-img{width:72px;height:72px;border-radius:8px;object-fit:cover;flex-shrink:0;background:var(--warm)}
+.link-preview .lp-body{flex:1;min-width:0;display:flex;flex-direction:column;justify-content:center}
+.link-preview .lp-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.link-preview .lp-desc{font-size:11px;color:var(--hint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.link-preview .lp-site{font-size:11px;color:var(--accent);margin-top:2px}
+.link-preview .lp-loading{font-size:12px;color:var(--hint)}
+
 .fab{position:fixed;bottom:28px;right:50%;transform:translateX(50%);padding:14px 28px;border-radius:28px;background:var(--accent);color:#fff;font-size:14px;font-weight:500;box-shadow:0 4px 20px rgba(29,158,117,.35);transition:transform .15s;z-index:20;display:flex;align-items:center;gap:6px}
 .fab:active{transform:translateX(50%) scale(0.96)}
 .fab svg{width:18px;height:18px}
@@ -91,7 +112,7 @@ input,textarea,select{font-family:inherit;outline:none}
 .empty-state .icon{font-size:48px;margin-bottom:12px;opacity:.4}
 .empty-state p{font-size:14px;line-height:1.6}
 
-/* Register View */
+/* Register */
 #register-view{display:none}
 .form-header{display:flex;align-items:center;gap:12px;padding:20px 0 24px}
 .form-header .back{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--sub);transition:background .15s}
@@ -114,7 +135,7 @@ input,textarea,select{font-family:inherit;outline:none}
 .preview-section .m-card{transition:opacity .3s}
 .preview-section .m-card.empty{opacity:.35}
 
-/* Edit modal overlay */
+/* Edit overlay */
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50;justify-content:center;align-items:flex-end}
 .overlay.show{display:flex}
 .overlay .sheet{background:var(--bg);border-radius:20px 20px 0 0;width:100%;max-width:480px;max-height:85dvh;overflow-y:auto;padding:28px 20px 40px;animation:slideUp .25s ease}
@@ -155,20 +176,40 @@ input,textarea,select{font-family:inherit;outline:none}
     <span class="room-info" id="room-badge"></span>
     <button style="font-size:13px;color:var(--sub);padding:6px 12px;border-radius:8px;border:1px solid var(--border)" onclick="logout()">나가기</button>
   </div>
-  <div class="month-nav">
-    <button onclick="changeMonth(-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg></button>
-    <div class="label">
-      <div class="year" id="nav-year"></div>
-      <div class="month" id="nav-month"></div>
+
+  <div class="tabs">
+    <button class="active" id="tab-dash" onclick="switchTab('dash')">다가오는 미션</button>
+    <button id="tab-month" onclick="switchTab('month')">월별 보기</button>
+  </div>
+
+  <!-- Dashboard Tab -->
+  <div id="dash-content">
+    <div class="stats">
+      <div class="stat-card"><div class="num" id="st-upcoming">0</div><div class="lbl">다가오는</div></div>
+      <div class="stat-card"><div class="num" id="st-total-p">0</div><div class="lbl">총 참여</div></div>
+      <div class="stat-card"><div class="num" id="st-my-p">0</div><div class="lbl">내 참여</div></div>
     </div>
-    <button onclick="changeMonth(1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
+    <div class="mission-list" id="dash-list"></div>
   </div>
-  <div class="stats">
-    <div class="stat-card"><div class="num" id="st-total">0</div><div class="lbl">등록 미션</div></div>
-    <div class="stat-card"><div class="num" id="st-joins">0</div><div class="lbl">총 참여</div></div>
-    <div class="stat-card"><div class="num" id="st-mine">0</div><div class="lbl">내 참여</div></div>
+
+  <!-- Monthly Tab -->
+  <div id="month-content" style="display:none">
+    <div class="month-nav">
+      <button onclick="changeMonth(-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+      <div class="label">
+        <div class="year" id="nav-year"></div>
+        <div class="month" id="nav-month"></div>
+      </div>
+      <button onclick="changeMonth(1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 6l6 6-6 6"/></svg></button>
+    </div>
+    <div class="stats">
+      <div class="stat-card"><div class="num" id="st-total">0</div><div class="lbl">등록 미션</div></div>
+      <div class="stat-card"><div class="num" id="st-joins">0</div><div class="lbl">총 참여</div></div>
+      <div class="stat-card"><div class="num" id="st-mine">0</div><div class="lbl">내 참여</div></div>
+    </div>
+    <div class="mission-list" id="mission-list"></div>
   </div>
-  <div class="mission-list" id="mission-list"></div>
+
   <button class="fab" onclick="showRegister()">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
     미션 등록
@@ -188,7 +229,7 @@ input,textarea,select{font-family:inherit;outline:none}
     <div class="counter"><span id="reg-tc">0</span>/30</div>
   </div>
   <div class="form-group">
-    <label>미션 설명 <span class="opt">(선택)</span></label>
+    <label>미션 설명 <span class="opt">(선택 / URL 입력 시 미리보기 표시)</span></label>
     <textarea id="reg-desc" placeholder="장소, 참가 링크, 준비물 등 자유롭게" maxlength="200" rows="3" oninput="updateRegPreview()"></textarea>
     <div class="counter"><span id="reg-dc">0</span>/200</div>
   </div>
@@ -214,7 +255,7 @@ input,textarea,select{font-family:inherit;outline:none}
 </div>
 
 <!-- EDIT OVERLAY -->
-<div class="overlay" id="edit-overlay">
+<div class="overlay" id="edit-overlay" onclick="if(event.target===this)closeEdit()">
   <div class="sheet">
     <h3>미션 수정</h3>
     <div class="form-group">
@@ -245,22 +286,20 @@ const COLORS = [
   {bg:'#EAF3DE',fg:'#27500A'},{bg:'#FCEBEB',fg:'#791F1F'}
 ];
 
-let state = { nickname:'', room:'', year:2026, month:4, missions:[], editId:null };
+let state = { nickname:'', room:'', year:2026, month:4, missions:[], currentTab:'dash' };
 
-// Restore session
-const saved = sessionStorage.getItem('mb_session');
+// ===== 1) Persistent login via localStorage =====
+const saved = localStorage.getItem('mb_session');
 if (saved) {
   try { const s = JSON.parse(saved); state.nickname = s.nickname; state.room = s.room; } catch(e) {}
 }
 
-// Init
 const now = new Date();
 state.year = now.getFullYear();
 state.month = now.getMonth() + 1;
 
 if (state.nickname && state.room) showBoard();
 
-// Entry validation
 document.getElementById('inp-nick').addEventListener('input', validateEntry);
 document.getElementById('inp-room').addEventListener('input', validateEntry);
 ['inp-nick','inp-room'].forEach(id => {
@@ -286,27 +325,79 @@ async function enterRoom() {
     if (!res.ok) return toast(data.error);
     state.nickname = nickname;
     state.room = room;
-    sessionStorage.setItem('mb_session', JSON.stringify({ nickname, room }));
+    localStorage.setItem('mb_session', JSON.stringify({ nickname, room }));
     showBoard();
   } catch(e) { toast('연결에 실패했어요.'); }
 }
 
 function logout() {
-  sessionStorage.removeItem('mb_session');
+  localStorage.removeItem('mb_session');
   state.nickname = ''; state.room = '';
   document.getElementById('board-view').style.display = 'none';
   document.getElementById('entry-view').style.display = 'flex';
 }
 
+// ===== Tab switching =====
+function switchTab(tab) {
+  state.currentTab = tab;
+  document.getElementById('tab-dash').classList.toggle('active', tab === 'dash');
+  document.getElementById('tab-month').classList.toggle('active', tab === 'month');
+  document.getElementById('dash-content').style.display = tab === 'dash' ? 'block' : 'none';
+  document.getElementById('month-content').style.display = tab === 'month' ? 'block' : 'none';
+  if (tab === 'dash') loadDashboard();
+  else loadMissions();
+}
+
+// ===== Board =====
 function showBoard() {
   document.getElementById('entry-view').style.display = 'none';
   document.getElementById('register-view').style.display = 'none';
   document.getElementById('board-view').style.display = 'block';
-  document.getElementById('room-badge').textContent = state.room + ' · ' + state.nickname;
+  document.getElementById('room-badge').textContent = state.room + ' \u00B7 ' + state.nickname;
   renderMonth();
-  loadMissions();
+  if (state.currentTab === 'dash') loadDashboard();
+  else loadMissions();
 }
 
+// ===== 2) Dashboard — all upcoming missions =====
+async function loadDashboard() {
+  try {
+    const res = await fetch('/api/rooms/' + encodeURIComponent(state.room) + '/upcoming');
+    const data = await res.json();
+    renderDashboard(data.upcoming || [], data.past || []);
+  } catch(e) { toast('미션을 불러올 수 없어요.'); }
+}
+
+function renderDashboard(upcoming, past) {
+  const list = document.getElementById('dash-list');
+  let totalP = 0, myP = 0;
+  upcoming.concat(past).forEach(m => {
+    totalP += m.participants.length;
+    if (m.participants.includes(state.nickname)) myP++;
+  });
+  document.getElementById('st-upcoming').textContent = upcoming.length;
+  document.getElementById('st-total-p').textContent = totalP;
+  document.getElementById('st-my-p').textContent = myP;
+
+  if (upcoming.length === 0 && past.length === 0) {
+    list.innerHTML = '<div class="empty-state"><div class="icon">&#9898;</div><p>아직 등록된 미션이 없어요.<br>첫 미션을 등록해보세요!</p></div>';
+    return;
+  }
+
+  let html = '';
+  if (upcoming.length > 0) {
+    html += '<div class="section-label">다가오는 미션 <span class="line"></span></div>';
+    html += upcoming.map(m => buildCard(m, false)).join('');
+  }
+  if (past.length > 0) {
+    html += '<div class="section-label">지난 미션 <span class="line"></span></div>';
+    html += past.map(m => buildCard(m, true)).join('');
+  }
+  list.innerHTML = html;
+  loadAllLinkPreviews(list);
+}
+
+// ===== Monthly view =====
 function changeMonth(dir) {
   state.month += dir;
   if (state.month > 12) { state.month = 1; state.year++; }
@@ -317,12 +408,12 @@ function changeMonth(dir) {
 
 function renderMonth() {
   document.getElementById('nav-year').textContent = state.year;
-  document.getElementById('nav-month').textContent = state.month + '월 미션';
+  document.getElementById('nav-month').textContent = state.month + '\uC6D4 \uBBF8\uC158';
 }
 
 async function loadMissions() {
   try {
-    const res = await fetch(`/api/rooms/${encodeURIComponent(state.room)}/missions?year=${state.year}&month=${state.month}`);
+    const res = await fetch('/api/rooms/' + encodeURIComponent(state.room) + '/missions?year=' + state.year + '&month=' + state.month);
     const data = await res.json();
     state.missions = data.missions || [];
     renderMissions();
@@ -334,42 +425,16 @@ function renderMissions() {
   const today = new Date(); today.setHours(0,0,0,0);
 
   if (state.missions.length === 0) {
-    list.innerHTML = '<div class="empty-state"><div class="icon">&#9898;</div><p>아직 등록된 미션이 없어요.<br>첫 미션을 등록해보세요!</p></div>';
+    list.innerHTML = '<div class="empty-state"><div class="icon">&#9898;</div><p>이 달에 등록된 미션이 없어요.</p></div>';
   } else {
     list.innerHTML = state.missions.map(m => {
       const d = new Date(m.event_date + 'T00:00:00');
       const diff = Math.round((d - today) / 86400000);
-      const dateStr = (d.getMonth()+1) + '/' + d.getDate() + ' (' + DAYS[d.getDay()] + ')';
-      const dday = diff > 0 ? 'D-' + diff : diff === 0 ? 'D-Day' : '종료';
-      const ddayClass = diff < 0 ? 'over' : '';
-      const isPast = diff < 0;
-      const isJoined = m.participants.includes(state.nickname);
-      const isOwner = m.owner === state.nickname;
-      const avatars = m.participants.map((p, i) => {
-        const c = COLORS[hashCode(p) % COLORS.length];
-        return `<div class="av" style="background:${c.bg};color:${c.fg}${i > 0 ? ';margin-left:-8px' : ''}">${p.charAt(0)}</div>`;
-      }).join('');
-
-      const descHtml = m.description ? `<div class="desc">${linkify(escHtml(m.description))}</div>` : '';
-      const ownerActions = isOwner ? `<div class="actions"><button class="act-btn" onclick="openEdit('${m.id}')">수정</button><button class="act-btn del" onclick="deleteMission('${m.id}')">삭제</button></div>` : '';
-
-      return `<div class="m-card${isPast ? ' past' : ''}">
-        <div class="top"><div style="flex:1">
-          <div class="date-row"><span class="date-pill">${dateStr}</span><span class="dday ${ddayClass}">${dday}</span></div>
-          <div class="title">${escHtml(m.title)}</div>
-          <div class="owner">미션오너: ${escHtml(m.owner)}</div>
-          ${descHtml}
-        </div></div>
-        <div class="bottom">
-          <div class="avatars">${avatars}<span class="p-count">${m.participants.length}명 참여</span></div>
-          <button class="join-btn${isJoined ? ' joined' : ''}" onclick="toggleJoin('${m.id}',${isJoined})">${isJoined ? '참여중' : '함께하기'}</button>
-        </div>
-        ${ownerActions}
-      </div>`;
+      return buildCard(m, diff < 0);
     }).join('');
+    loadAllLinkPreviews(list);
   }
 
-  // Stats
   let totalJoins = 0, myJoins = 0;
   state.missions.forEach(m => {
     totalJoins += m.participants.length;
@@ -380,35 +445,105 @@ function renderMissions() {
   document.getElementById('st-mine').textContent = myJoins;
 }
 
+// ===== Shared card builder =====
+function buildCard(m, isPast) {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const d = new Date(m.event_date + 'T00:00:00');
+  const diff = Math.round((d - today) / 86400000);
+  const dateStr = (d.getMonth()+1) + '/' + d.getDate() + ' (' + DAYS[d.getDay()] + ')';
+  const dday = diff > 0 ? 'D-' + diff : diff === 0 ? 'D-Day' : '\uC885\uB8CC';
+  const ddayClass = diff < 0 ? 'over' : '';
+  const isJoined = m.participants.includes(state.nickname);
+  const isOwner = m.owner === state.nickname;
+
+  const avatars = m.participants.map((p, i) => {
+    const c = COLORS[hashCode(p) % COLORS.length];
+    return '<div class="av" style="background:'+c.bg+';color:'+c.fg+(i>0?';margin-left:-8px':'')+'">'+p.charAt(0)+'</div>';
+  }).join('');
+
+  const descTextHtml = m.description ? '<div class="desc">'+linkify(escHtml(m.description))+'</div>' : '';
+  const linkPreviewHtml = extractFirstURL(m.description) ? '<div class="lp-slot" data-url="'+escHtml(extractFirstURL(m.description))+'"><div class="link-preview"><span class="lp-loading">링크 미리보기 불러오는 중...</span></div></div>' : '';
+  const ownerActions = isOwner ? '<div class="actions"><button class="act-btn" onclick="openEdit(\''+m.id+'\')">수정</button><button class="act-btn del" onclick="deleteMission(\''+m.id+'\')">삭제</button></div>' : '';
+
+  return '<div class="m-card'+(isPast?' past':'')+'">' +
+    '<div class="date-row"><span class="date-pill">'+dateStr+'</span><span class="dday '+ddayClass+'">'+dday+'</span></div>' +
+    '<div class="title">'+escHtml(m.title)+'</div>' +
+    '<div class="owner">\uBBF8\uC158\uC624\uB108: '+escHtml(m.owner)+'</div>' +
+    descTextHtml + linkPreviewHtml +
+    '<div class="bottom"><div class="avatars">'+avatars+'<span class="p-count">'+m.participants.length+'\uBA85 \uCC38\uC5EC</span></div>' +
+    '<button class="join-btn'+(isJoined?' joined':'')+'" onclick="toggleJoin(\''+m.id+'\','+isJoined+')">'+(isJoined?'\uCC38\uC5EC\uC911':'\uD568\uAED8\uD558\uAE30')+'</button></div>' +
+    ownerActions + '</div>';
+}
+
+// ===== 3) Link preview =====
+const ogCache = {};
+
+function extractFirstURL(text) {
+  if (!text) return null;
+  const m = text.match(/https?:\/\/[^\s]+/);
+  return m ? m[0] : null;
+}
+
+async function fetchOG(url) {
+  if (ogCache[url]) return ogCache[url];
+  try {
+    const res = await fetch('/api/og?url=' + encodeURIComponent(url));
+    const data = await res.json();
+    ogCache[url] = data;
+    return data;
+  } catch(e) { return null; }
+}
+
+function loadAllLinkPreviews(container) {
+  const slots = container.querySelectorAll('.lp-slot');
+  slots.forEach(async (slot) => {
+    const url = slot.dataset.url;
+    if (!url) return;
+    const og = await fetchOG(url);
+    if (!og || (!og.title && !og.image)) {
+      slot.remove();
+      return;
+    }
+    const imgHtml = og.image ? '<img class="lp-img" src="'+escHtml(og.image)+'" onerror="this.style.display=\'none\'" alt="">' : '';
+    const siteHost = (() => { try { return new URL(url).hostname; } catch(e) { return ''; } })();
+    slot.innerHTML = '<a class="link-preview" href="'+escHtml(url)+'" target="_blank" rel="noopener">' +
+      imgHtml +
+      '<div class="lp-body">' +
+        (og.title ? '<div class="lp-title">'+escHtml(og.title)+'</div>' : '') +
+        (og.description ? '<div class="lp-desc">'+escHtml(og.description)+'</div>' : '') +
+        '<div class="lp-site">'+(og.site_name || siteHost)+'</div>' +
+      '</div></a>';
+  });
+}
+
+// ===== Join / Leave =====
 async function toggleJoin(id, isJoined) {
   const endpoint = isJoined ? 'leave' : 'join';
   try {
-    const res = await fetch(`/api/rooms/${encodeURIComponent(state.room)}/missions/${id}/${endpoint}`, {
+    const res = await fetch('/api/rooms/' + encodeURIComponent(state.room) + '/missions/' + id + '/' + endpoint, {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ nickname: state.nickname })
     });
     const data = await res.json();
     if (!res.ok) return toast(data.error);
-    loadMissions();
+    if (state.currentTab === 'dash') loadDashboard();
+    else loadMissions();
   } catch(e) { toast('처리에 실패했어요.'); }
 }
 
-// Register
-function showRegister(editData) {
+// ===== Register =====
+function showRegister() {
   document.getElementById('board-view').style.display = 'none';
   document.getElementById('register-view').style.display = 'block';
-  document.getElementById('form-month-tag').textContent = state.month + '월';
-  document.getElementById('pv-owner').textContent = '미션오너: ' + state.nickname;
+  document.getElementById('form-month-tag').textContent = state.month + '\uC6D4';
+  document.getElementById('pv-owner').textContent = '\uBBF8\uC158\uC624\uB108: ' + state.nickname;
   document.getElementById('pv-av').textContent = state.nickname.charAt(0);
-
-  if (!editData) {
-    document.getElementById('form-title').textContent = '미션 등록';
-    document.getElementById('reg-title').value = '';
-    document.getElementById('reg-desc').value = '';
-    document.getElementById('reg-date').value = '';
-    document.getElementById('btn-submit').textContent = '미션 등록하기';
-    document.getElementById('btn-submit').onclick = submitMission;
-  }
+  document.getElementById('form-title').textContent = '\uBBF8\uC158 \uB4F1\uB85D';
+  document.getElementById('reg-title').value = '';
+  document.getElementById('reg-desc').value = '';
+  document.getElementById('reg-date').value = '';
+  document.getElementById('btn-submit').textContent = '\uBBF8\uC158 \uB4F1\uB85D\uD558\uAE30';
+  document.getElementById('btn-submit').onclick = submitMission;
   updateRegPreview();
 }
 
@@ -419,7 +554,7 @@ function updateRegPreview() {
 
   document.getElementById('reg-tc').textContent = title.length;
   document.getElementById('reg-dc').textContent = desc.length;
-  document.getElementById('pv-title').textContent = title || '미션 제목을 입력하세요';
+  document.getElementById('pv-title').textContent = title || '\uBBF8\uC158 \uC81C\uBAA9\uC744 \uC785\uB825\uD558\uC138\uC694';
 
   const pvDesc = document.getElementById('pv-desc');
   if (desc) { pvDesc.textContent = desc; pvDesc.style.display = 'block'; }
@@ -430,9 +565,9 @@ function updateRegPreview() {
     document.getElementById('pv-date').textContent = (d.getMonth()+1) + '/' + d.getDate() + ' (' + DAYS[d.getDay()] + ')';
     const today = new Date(); today.setHours(0,0,0,0);
     const diff = Math.round((d - today) / 86400000);
-    document.getElementById('pv-dday').textContent = diff > 0 ? 'D-' + diff : diff === 0 ? 'D-Day' : '종료';
+    document.getElementById('pv-dday').textContent = diff > 0 ? 'D-' + diff : diff === 0 ? 'D-Day' : '\uC885\uB8CC';
   } else {
-    document.getElementById('pv-date').textContent = '날짜 미정';
+    document.getElementById('pv-date').textContent = '\uB0A0\uC9DC \uBBF8\uC815';
     document.getElementById('pv-dday').textContent = '';
   }
 
@@ -448,33 +583,59 @@ async function submitMission() {
   if (!title || !event_date) return;
 
   try {
-    const res = await fetch(`/api/rooms/${encodeURIComponent(state.room)}/missions`, {
+    const res = await fetch('/api/rooms/' + encodeURIComponent(state.room) + '/missions', {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ title, description, event_date, owner: state.nickname })
     });
     const data = await res.json();
     if (!res.ok) return toast(data.error);
 
-    // Set month to match the registered mission
     const d = new Date(event_date + 'T00:00:00');
     state.year = d.getFullYear();
     state.month = d.getMonth() + 1;
 
-    toast('미션이 등록되었어요!');
+    toast('\uBBF8\uC158\uC774 \uB4F1\uB85D\uB418\uC5C8\uC5B4\uC694!');
     showBoard();
-  } catch(e) { toast('등록에 실패했어요.'); }
+  } catch(e) { toast('\uB4F1\uB85D\uC5D0 \uC2E4\uD328\uD588\uC5B4\uC694.'); }
 }
 
-// Edit
+// ===== Edit / Delete =====
 function openEdit(id) {
-  const m = state.missions.find(x => x.id === id);
-  if (!m) return;
-  document.getElementById('edit-id').value = id;
-  document.getElementById('edit-title').value = m.title;
-  document.getElementById('edit-desc').value = m.description || '';
-  document.getElementById('edit-date').value = m.event_date;
-  document.getElementById('edit-overlay').classList.add('show');
+  const findIn = state.currentTab === 'dash' ? null : state.missions;
+  let m = null;
+  if (findIn) m = findIn.find(x => x.id === id);
+  if (!m) {
+    // fetch from server for dashboard mode
+    fetch('/api/rooms/' + encodeURIComponent(state.room) + '/missions?year=2020&month=1')
+    // Simpler: just search all missions on dashboard load
+  }
+  // Quick approach: store missions globally for both tabs
+  if (!m) {
+    // search in dash
+    const cards = document.querySelectorAll('.m-card');
+    // Fallback: refetch
+  }
+  // Simplified: always refetch for edit
+  fetchMissionForEdit(id);
 }
+
+async function fetchMissionForEdit(id) {
+  // Get the mission data from the DOM-stored id
+  // Actually let's just load all and find it
+  try {
+    const res = await fetch('/api/rooms/' + encodeURIComponent(state.room) + '/upcoming');
+    const data = await res.json();
+    const all = (data.upcoming || []).concat(data.past || []);
+    const m = all.find(x => x.id === id);
+    if (!m) return toast('\uBBF8\uC158\uC744 \uCC3E\uC744 \uC218 \uC5C6\uC5B4\uC694.');
+    document.getElementById('edit-id').value = id;
+    document.getElementById('edit-title').value = m.title;
+    document.getElementById('edit-desc').value = m.description || '';
+    document.getElementById('edit-date').value = m.event_date;
+    document.getElementById('edit-overlay').classList.add('show');
+  } catch(e) { toast('\uBBF8\uC158 \uC815\uBCF4\uB97C \uBD88\uB7EC\uC62C \uC218 \uC5C6\uC5B4\uC694.'); }
+}
+
 function closeEdit() { document.getElementById('edit-overlay').classList.remove('show'); }
 
 async function saveEdit() {
@@ -482,36 +643,38 @@ async function saveEdit() {
   const title = document.getElementById('edit-title').value.trim();
   const description = document.getElementById('edit-desc').value.trim();
   const event_date = document.getElementById('edit-date').value;
-  if (!title || !event_date) return toast('제목과 날짜를 입력해주세요.');
+  if (!title || !event_date) return toast('\uC81C\uBAA9\uACFC \uB0A0\uC9DC\uB97C \uC785\uB825\uD574\uC8FC\uC138\uC694.');
 
   try {
-    const res = await fetch(`/api/rooms/${encodeURIComponent(state.room)}/missions/${id}`, {
+    const res = await fetch('/api/rooms/' + encodeURIComponent(state.room) + '/missions/' + id, {
       method:'PUT', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ title, description, event_date, owner: state.nickname })
     });
     const data = await res.json();
     if (!res.ok) return toast(data.error);
     closeEdit();
-    toast('수정되었어요!');
-    loadMissions();
-  } catch(e) { toast('수정에 실패했어요.'); }
+    toast('\uC218\uC815\uB418\uC5C8\uC5B4\uC694!');
+    if (state.currentTab === 'dash') loadDashboard();
+    else loadMissions();
+  } catch(e) { toast('\uC218\uC815\uC5D0 \uC2E4\uD328\uD588\uC5B4\uC694.'); }
 }
 
 async function deleteMission(id) {
-  if (!confirm('이 미션을 삭제할까요?')) return;
+  if (!confirm('\uC774 \uBBF8\uC158\uC744 \uC0AD\uC81C\uD560\uAE4C\uC694?')) return;
   try {
-    const res = await fetch(`/api/rooms/${encodeURIComponent(state.room)}/missions/${id}`, {
+    const res = await fetch('/api/rooms/' + encodeURIComponent(state.room) + '/missions/' + id, {
       method:'DELETE', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ owner: state.nickname })
     });
     const data = await res.json();
     if (!res.ok) return toast(data.error);
-    toast('삭제되었어요.');
-    loadMissions();
-  } catch(e) { toast('삭제에 실패했어요.'); }
+    toast('\uC0AD\uC81C\uB418\uC5C8\uC5B4\uC694.');
+    if (state.currentTab === 'dash') loadDashboard();
+    else loadMissions();
+  } catch(e) { toast('\uC0AD\uC81C\uC5D0 \uC2E4\uD328\uD588\uC5B4\uC694.'); }
 }
 
-// Helpers
+// ===== Helpers =====
 function escHtml(s) { const el = document.createElement('span'); el.textContent = s; return el.innerHTML; }
 function linkify(text) { return text.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>'); }
 function hashCode(s) { let h = 0; for (let i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0; return Math.abs(h); }
