@@ -238,6 +238,61 @@ app.get('/api/og', async (req, res) => {
   }
 });
 
+// Kakao OAuth callback
+const KAKAO_REST_KEY = process.env.KAKAO_REST_KEY || 'ccbd6e4c49a642123095a8706c79f1ff';
+
+app.get('/auth/kakao/callback', async (req, res) => {
+  const { code } = req.query;
+  if (!code) return res.redirect('/?kakao_error=no_code');
+
+  try {
+    // Exchange code for token
+    const tokenData = await new Promise((resolve, reject) => {
+      const postData = 'grant_type=authorization_code'
+        + '&client_id=' + KAKAO_REST_KEY
+        + '&redirect_uri=' + encodeURIComponent(req.protocol + '://' + req.get('host') + '/auth/kakao/callback')
+        + '&code=' + code;
+      const tokenReq = https.request({
+        hostname: 'kauth.kakao.com', path: '/oauth/token', method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Content-Length': Buffer.byteLength(postData) }
+      }, (tokenRes) => {
+        let body = ''; tokenRes.on('data', c => body += c);
+        tokenRes.on('end', () => { try { resolve(JSON.parse(body)); } catch(e) { reject(e); } });
+      });
+      tokenReq.on('error', reject);
+      tokenReq.write(postData);
+      tokenReq.end();
+    });
+
+    if (!tokenData.access_token) return res.redirect('/?kakao_error=no_token');
+
+    // Get user profile
+    const profile = await new Promise((resolve, reject) => {
+      const profileReq = https.request({
+        hostname: 'kapi.kakao.com', path: '/v2/user/me', method: 'GET',
+        headers: { 'Authorization': 'Bearer ' + tokenData.access_token }
+      }, (profileRes) => {
+        let body = ''; profileRes.on('data', c => body += c);
+        profileRes.on('end', () => { try { resolve(JSON.parse(body)); } catch(e) { reject(e); } });
+      });
+      profileReq.on('error', reject);
+      profileReq.end();
+    });
+
+    const kakaoAccount = profile.kakao_account || {};
+    const kakaoProfile = kakaoAccount.profile || {};
+    const nickname = (kakaoProfile.nickname || '').substring(0, 10);
+    const profileImg = kakaoProfile.thumbnail_image_url || kakaoProfile.profile_image_url || '';
+
+    // Redirect back to frontend with profile info
+    const params = new URLSearchParams({ kakao_nick: nickname, kakao_img: profileImg });
+    res.redirect('/?' + params.toString());
+  } catch(e) {
+    console.error('Kakao OAuth error:', e.message);
+    res.redirect('/?kakao_error=failed');
+  }
+});
+
 // SPA fallback
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
