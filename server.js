@@ -2,6 +2,8 @@ const express = require('express');
 const { nanoid } = require('nanoid');
 const path = require('path');
 const fs = require('fs');
+const https = require('https');
+const http = require('http');
 
 const app = express();
 app.use(express.json());
@@ -22,6 +24,45 @@ function saveDB(db) {
   fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2), 'utf-8');
 }
 
+// --- OG preview cache (in-memory) ---
+const ogCache = new Map();
+
+function fetchURL(url) {
+  return new Promise((resolve, reject) => {
+    const mod = url.startsWith('https') ? https : http;
+    const req = mod.get(url, { headers: { 'User-Agent': 'Mozilla/5.0 (compatible; MissionBoard/1.0)' }, timeout: 5000 }, (res) => {
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        return fetchURL(res.headers.location).then(resolve).catch(reject);
+      }
+      let data = '';
+      res.setEncoding('utf-8');
+      res.on('data', chunk => { data += chunk; if (data.length > 50000) res.destroy(); });
+      res.on('end', () => resolve(data));
+    });
+    req.on('error', reject);
+    req.on('timeout', () => { req.destroy(); reject(new Error('timeout')); });
+  });
+}
+
+function extractOG(html) {
+  const get = (prop) => {
+    const re = new RegExp(`<meta[^>]+property=["']og:${prop}["'][^>]+content=["']([^"']+)["']`, 'i');
+    const re2 = new RegExp(`<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:${prop}["']`, 'i');
+    const m = html.match(re) || html.match(re2);
+    return m ? m[1] : '';
+  };
+  const titleFallback = () => {
+    const m = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+    return m ? m[1].trim() : '';
+  };
+  return {
+    title: get('title') || titleFallback(),
+    description: get('description'),
+    image: get('image'),
+    site_name: get('site_name'),
+  };
+}
+
 // --- API Routes ---
 
 app.post('/api/rooms/enter', (req, res) => {
@@ -37,6 +78,7 @@ app.post('/api/rooms/enter', (req, res) => {
   res.json({ ok: true, room: c, nickname: nickname.trim() });
 });
 
+// Monthly missions
 app.get('/api/rooms/:code/missions', (req, res) => {
   const { code } = req.params;
   const { year, month } = req.query;
@@ -50,6 +92,24 @@ app.get('/api/rooms/:code/missions', (req, res) => {
   });
   all.sort((a, b) => a.event_date.localeCompare(b.event_date));
   res.json({ missions: all });
+});
+
+// All upcoming missions (for dashboard)
+app.get('/api/rooms/:code/upcoming', (req, res) => {
+  const { code } = req.params;
+  const db = loadDB();
+  const today = new Date().toISOString().slice(0, 10);
+
+  const upcoming = Object.values(db.missions)
+    .filter(m => m.room_code === code && m.event_date >= today)
+    .sort((a, b) => a.event_date.localeCompare(b.event_date));
+
+  const past = Object.values(db.missions)
+    .filter(m => m.room_code === code && m.event_date < today)
+    .sort((a, b) => b.event_date.localeCompare(a.event_date))
+    .slice(0, 5);
+
+  res.json({ upcoming, past });
 });
 
 app.post('/api/rooms/:code/missions', (req, res) => {
@@ -135,6 +195,30 @@ app.post('/api/rooms/:code/missions/:id/leave', (req, res) => {
   res.json({ ok: true, participants: m.participants });
 });
 
+// OG link preview
+app.get('/api/og', async (req, res) => {
+  const { url } = req.query;
+  if (!url) return res.status(400).json({ error: 'url 파라미터가 필요합니다.' });
+
+  try {
+    const u = decodeURIComponent(url);
+    if (ogCache.has(u)) return res.json(ogCache.get(u));
+
+    const html = await fetchURL(u);
+    const og = extractOG(html);
+    og.url = u;
+    ogCache.set(u, og);
+    if (ogCache.size > 200) {
+      const first = ogCache.keys().next().value;
+      ogCache.delete(first);
+    }
+    res.json(og);
+  } catch(e) {
+    res.json({ title: '', description: '', image: '', url: url });
+  }
+});
+
+// SPA fallback
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
