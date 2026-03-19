@@ -377,6 +377,7 @@ if (kakaoNick) {
   window.history.replaceState({}, '', window.location.pathname);
 } else if (kakaoError) {
   window.history.replaceState({}, '', window.location.pathname);
+  setTimeout(function(){ toast('\uCE74\uCE74\uC624 \uB85C\uADF8\uC778\uC5D0 \uC2E4\uD328\uD588\uC5B4\uC694. (' + kakaoError + ')'); }, 500);
 } else {
   // Check URL params
   var urlRoom = urlParams.get('room');
