@@ -311,38 +311,93 @@ input,textarea,select{font-family:inherit;outline:none}
 // ===== Kakao SDK Init =====
 Kakao.init('ce170e14601cd8e467c2eb57611d43f5');
 
-const DAYS = ['일','월','화','수','목','금','토'];
-const COLORS = [
+var DAYS = ['일','월','화','수','목','금','토'];
+var COLORS = [
   {bg:'#E1F5EE',fg:'#085041'},{bg:'#E6F1FB',fg:'#0C447C'},{bg:'#FAEEDA',fg:'#633806'},
   {bg:'#FBEAF0',fg:'#72243E'},{bg:'#EEEDFE',fg:'#3C3489'},{bg:'#FAECE7',fg:'#712B13'},
   {bg:'#EAF3DE',fg:'#27500A'},{bg:'#FCEBEB',fg:'#791F1F'}
 ];
 
-let state = { nickname:'', room:'', year:2026, month:4, missions:[], currentTab:'dash', profileImg:'' };
+var state = { nickname:'', room:'', year:2026, month:4, missions:[], currentTab:'dash', profileImg:'' };
 
-// ===== Login priority: URL > localStorage > manual =====
-const urlParams = new URLSearchParams(window.location.search);
-const urlRoom = urlParams.get('room');
-const urlNick = urlParams.get('nick');
+// ===== Cookie helpers (backup for localStorage) =====
+function setCookie(name, value, days) {
+  var d = new Date(); d.setTime(d.getTime() + days * 86400000);
+  document.cookie = name + '=' + encodeURIComponent(value) + ';expires=' + d.toUTCString() + ';path=/;SameSite=Lax';
+}
+function getCookie(name) {
+  var match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+  return match ? decodeURIComponent(match[2]) : '';
+}
+function deleteCookie(name) {
+  document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/;SameSite=Lax';
+}
 
-if (urlRoom && urlNick) {
-  state.room = urlRoom.trim();
-  state.nickname = urlNick.trim();
-  localStorage.setItem('mb_session', JSON.stringify({ nickname: state.nickname, room: state.room, profileImg: '' }));
+// Save session to BOTH localStorage and cookie
+function saveSession(nick, room, img) {
+  var data = JSON.stringify({ nickname: nick, room: room, profileImg: img || '' });
+  try { localStorage.setItem('mb_session', data); } catch(e) {}
+  setCookie('mb_session', data, 365);
+}
+
+// Load session: localStorage first, then cookie fallback
+function loadSession() {
+  var data = null;
+  try { data = localStorage.getItem('mb_session'); } catch(e) {}
+  if (!data) data = getCookie('mb_session');
+  if (data) {
+    try { return JSON.parse(data); } catch(e) {}
+  }
+  return null;
+}
+
+function clearSession() {
+  try { localStorage.removeItem('mb_session'); } catch(e) {}
+  deleteCookie('mb_session');
+}
+
+// ===== Session restore: Kakao callback > URL params > localStorage/cookie =====
+var urlParams = new URLSearchParams(window.location.search);
+
+// Check if this is a Kakao OAuth callback
+var kakaoNick = urlParams.get('kakao_nick');
+var kakaoImg = urlParams.get('kakao_img');
+var kakaoError = urlParams.get('kakao_error');
+
+if (kakaoNick) {
+  // Returning from Kakao login — set nickname + profile, show entry for room code
+  state.nickname = kakaoNick.trim();
+  state.profileImg = kakaoImg || '';
+  // Check if we had a room stored before redirect
+  var preLoginRoom = getCookie('mb_pre_login_room');
+  if (preLoginRoom) {
+    state.room = preLoginRoom;
+    deleteCookie('mb_pre_login_room');
+  }
+  window.history.replaceState({}, '', window.location.pathname);
+} else if (kakaoError) {
   window.history.replaceState({}, '', window.location.pathname);
 } else {
-  const saved = localStorage.getItem('mb_session');
-  if (saved) {
-    try {
-      const s = JSON.parse(saved);
-      state.nickname = s.nickname;
-      state.room = s.room;
-      state.profileImg = s.profileImg || '';
-    } catch(e) {}
+  // Check URL params
+  var urlRoom = urlParams.get('room');
+  var urlNick = urlParams.get('nick');
+  if (urlRoom && urlNick) {
+    state.room = urlRoom.trim();
+    state.nickname = urlNick.trim();
+    saveSession(state.nickname, state.room, '');
+    window.history.replaceState({}, '', window.location.pathname);
+  } else {
+    // Restore from localStorage or cookie
+    var saved = loadSession();
+    if (saved) {
+      state.nickname = saved.nickname || '';
+      state.room = saved.room || '';
+      state.profileImg = saved.profileImg || '';
+    }
   }
 }
 
-const now = new Date();
+var now = new Date();
 state.year = now.getFullYear();
 state.month = now.getMonth() + 1;
 
@@ -352,8 +407,16 @@ if (state.nickname && state.room) {
     body: JSON.stringify({ code: state.room, nickname: state.nickname })
   }).then(function(){ showBoard(); }).catch(function(){ showBoard(); });
 } else {
-  if (urlRoom) document.getElementById('inp-room').value = urlRoom;
-  if (urlNick) document.getElementById('inp-nick').value = urlNick;
+  // Show entry view — pre-fill if we have partial data (e.g. kakao login but no room yet)
+  if (state.nickname) {
+    // Kakao login completed, show profile and just need room code
+    document.getElementById('entry-step1').style.display = 'none';
+    document.getElementById('kakao-profile-box').style.display = 'flex';
+    document.getElementById('kakao-thumb').src = state.profileImg || '';
+    document.getElementById('kakao-name').textContent = state.nickname;
+  }
+  var urlR = urlParams.get('room');
+  if (urlR) document.getElementById('inp-room').value = urlR;
   validateEntry();
 }
 
@@ -366,37 +429,22 @@ document.getElementById('inp-room').addEventListener('input', validateEntry);
 function validateEntry() {
   var nick = document.getElementById('inp-nick').value.trim();
   var room = document.getElementById('inp-room').value.trim();
-  // If kakao logged in, nickname is already set
   var hasNick = state.nickname || nick;
   document.getElementById('btn-enter').disabled = !(hasNick && room);
 }
 
-// ===== Kakao Login =====
+// ===== Kakao Login (redirect flow) =====
 function kakaoLogin() {
-  Kakao.Auth.login({
-    success: function() {
-      Kakao.API.request({
-        url: '/v2/user/me',
-        success: function(res) {
-          var profile = res.kakao_account && res.kakao_account.profile;
-          if (profile) {
-            state.nickname = (profile.nickname || '').substring(0, 10);
-            state.profileImg = profile.thumbnail_image_url || profile.profile_image_url || '';
+  // Save current room input so we can restore after redirect
+  var roomVal = document.getElementById('inp-room').value.trim();
+  if (roomVal) setCookie('mb_pre_login_room', roomVal, 1);
 
-            // Show profile, hide manual input
-            document.getElementById('entry-step1').style.display = 'none';
-            var box = document.getElementById('kakao-profile-box');
-            box.style.display = 'flex';
-            document.getElementById('kakao-thumb').src = state.profileImg || '';
-            document.getElementById('kakao-name').textContent = state.nickname;
-            validateEntry();
-          }
-        },
-        fail: function() { toast('\uD504\uB85C\uD544 \uC815\uBCF4\uB97C \uAC00\uC838\uC62C \uC218 \uC5C6\uC5B4\uC694.'); }
-      });
-    },
-    fail: function() { toast('\uCE74\uCE74\uC624 \uB85C\uADF8\uC778\uC5D0 \uC2E4\uD328\uD588\uC5B4\uC694.'); }
-  });
+  var redirectUri = window.location.origin + '/auth/kakao/callback';
+  var kakaoAuthUrl = 'https://kauth.kakao.com/oauth/authorize'
+    + '?client_id=ccbd6e4c49a642123095a8706c79f1ff'
+    + '&redirect_uri=' + encodeURIComponent(redirectUri)
+    + '&response_type=code';
+  window.location.href = kakaoAuthUrl;
 }
 
 async function enterRoom() {
@@ -412,20 +460,16 @@ async function enterRoom() {
     if (!res.ok) return toast(data.error);
     state.nickname = nick;
     state.room = room;
-    localStorage.setItem('mb_session', JSON.stringify({ nickname: nick, room: room, profileImg: state.profileImg }));
+    saveSession(nick, room, state.profileImg);
     showBoard();
   } catch(e) { toast('\uC5F0\uACB0\uC5D0 \uC2E4\uD328\uD588\uC5B4\uC694.'); }
 }
 
 function logout() {
-  localStorage.removeItem('mb_session');
-  if (Kakao.Auth.getAccessToken()) {
-    Kakao.Auth.logout(function(){});
-  }
+  clearSession();
   state.nickname = ''; state.room = ''; state.profileImg = '';
   document.getElementById('board-view').style.display = 'none';
   document.getElementById('entry-view').style.display = 'flex';
-  // Reset entry UI
   document.getElementById('entry-step1').style.display = 'block';
   document.getElementById('kakao-profile-box').style.display = 'none';
   document.getElementById('inp-nick').value = '';
