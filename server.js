@@ -238,57 +238,77 @@ app.get('/api/og', async (req, res) => {
   }
 });
 
+// Trust proxy (Railway runs behind a reverse proxy)
+app.set('trust proxy', 1);
+
 // Kakao OAuth callback
 const KAKAO_REST_KEY = process.env.KAKAO_REST_KEY || 'ccbd6e4c49a642123095a8706c79f1ff';
+const KAKAO_CLIENT_SECRET = process.env.KAKAO_CLIENT_SECRET || '';
 
 app.get('/auth/kakao/callback', async (req, res) => {
-  const { code } = req.query;
-  if (!code) return res.redirect('/?kakao_error=no_code');
+  const { code, error: kakaoErr } = req.query;
+  console.log('Kakao callback hit, code:', code ? 'yes' : 'no', 'error:', kakaoErr || 'none');
+
+  if (!code) return res.redirect('/?kakao_error=' + (kakaoErr || 'no_code'));
 
   try {
+    var redirectUri = 'https://' + req.get('host') + '/auth/kakao/callback';
+    console.log('Using redirect_uri:', redirectUri);
+
     // Exchange code for token
-    const tokenData = await new Promise((resolve, reject) => {
-      const postData = 'grant_type=authorization_code'
-        + '&client_id=' + KAKAO_REST_KEY
-        + '&redirect_uri=' + encodeURIComponent(req.protocol + '://' + req.get('host') + '/auth/kakao/callback')
-        + '&code=' + code;
-      const tokenReq = https.request({
+    var postData = 'grant_type=authorization_code'
+      + '&client_id=' + KAKAO_REST_KEY
+      + '&redirect_uri=' + encodeURIComponent(redirectUri)
+      + '&code=' + code;
+    if (KAKAO_CLIENT_SECRET) postData += '&client_secret=' + KAKAO_CLIENT_SECRET;
+
+    var tokenData = await new Promise(function(resolve, reject) {
+      var tokenReq = https.request({
         hostname: 'kauth.kakao.com', path: '/oauth/token', method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Content-Length': Buffer.byteLength(postData) }
-      }, (tokenRes) => {
-        let body = ''; tokenRes.on('data', c => body += c);
-        tokenRes.on('end', () => { try { resolve(JSON.parse(body)); } catch(e) { reject(e); } });
+      }, function(tokenRes) {
+        var body = ''; tokenRes.on('data', function(c){ body += c; });
+        tokenRes.on('end', function() {
+          console.log('Kakao token response:', body.substring(0, 200));
+          try { resolve(JSON.parse(body)); } catch(e) { reject(e); }
+        });
       });
-      tokenReq.on('error', reject);
+      tokenReq.on('error', function(e) { console.error('Token request error:', e.message); reject(e); });
       tokenReq.write(postData);
       tokenReq.end();
     });
 
-    if (!tokenData.access_token) return res.redirect('/?kakao_error=no_token');
+    if (!tokenData.access_token) {
+      console.error('No access_token. Response:', JSON.stringify(tokenData));
+      return res.redirect('/?kakao_error=no_token');
+    }
 
     // Get user profile
-    const profile = await new Promise((resolve, reject) => {
-      const profileReq = https.request({
+    var profile = await new Promise(function(resolve, reject) {
+      var profileReq = https.request({
         hostname: 'kapi.kakao.com', path: '/v2/user/me', method: 'GET',
         headers: { 'Authorization': 'Bearer ' + tokenData.access_token }
-      }, (profileRes) => {
-        let body = ''; profileRes.on('data', c => body += c);
-        profileRes.on('end', () => { try { resolve(JSON.parse(body)); } catch(e) { reject(e); } });
+      }, function(profileRes) {
+        var body = ''; profileRes.on('data', function(c){ body += c; });
+        profileRes.on('end', function() {
+          console.log('Kakao profile response:', body.substring(0, 200));
+          try { resolve(JSON.parse(body)); } catch(e) { reject(e); }
+        });
       });
-      profileReq.on('error', reject);
+      profileReq.on('error', function(e) { console.error('Profile request error:', e.message); reject(e); });
       profileReq.end();
     });
 
-    const kakaoAccount = profile.kakao_account || {};
-    const kakaoProfile = kakaoAccount.profile || {};
-    const nickname = (kakaoProfile.nickname || '').substring(0, 10);
-    const profileImg = kakaoProfile.thumbnail_image_url || kakaoProfile.profile_image_url || '';
+    var kakaoAccount = profile.kakao_account || {};
+    var kakaoProfile = kakaoAccount.profile || {};
+    var nickname = (kakaoProfile.nickname || '').substring(0, 10);
+    var profileImg = kakaoProfile.thumbnail_image_url || kakaoProfile.profile_image_url || '';
 
-    // Redirect back to frontend with profile info
-    const params = new URLSearchParams({ kakao_nick: nickname, kakao_img: profileImg });
+    console.log('Kakao login success:', nickname);
+    var params = new URLSearchParams({ kakao_nick: nickname, kakao_img: profileImg });
     res.redirect('/?' + params.toString());
   } catch(e) {
-    console.error('Kakao OAuth error:', e.message);
+    console.error('Kakao OAuth error:', e.message, e.stack);
     res.redirect('/?kakao_error=failed');
   }
 });
