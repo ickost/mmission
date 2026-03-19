@@ -6,13 +6,14 @@
 <title>미션보드</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://t1.kakaocdn.net/kakao_js_sdk/2.7.4/kakao.min.js" crossorigin="anonymous"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
   --bg:#FAFAF7;--card:#FFFFFF;--text:#1A1A18;--sub:#6B6B66;--hint:#A3A39E;
   --border:#E8E8E3;--accent:#1D9E75;--accent-bg:#E1F5EE;--accent-dark:#085041;
   --danger:#E24B4A;--danger-bg:#FCEBEB;
-  --warm:#F5F0E8;--warm2:#EDE6DA;
+  --warm:#F5F0E8;--warm2:#EDE6DA;--kakao:#FEE500;--kakao-text:#191919;
   --radius:14px;--radius-sm:10px;
 }
 body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;-webkit-font-smoothing:antialiased}
@@ -25,7 +26,12 @@ input,textarea,select{font-family:inherit;outline:none}
 #entry-view .logo{width:72px;height:72px;border-radius:20px;background:var(--accent);display:flex;align-items:center;justify-content:center;margin-bottom:24px}
 #entry-view .logo svg{width:36px;height:36px}
 #entry-view h1{font-size:24px;font-weight:700;margin-bottom:6px;letter-spacing:-0.5px}
-#entry-view .tagline{font-size:14px;color:var(--sub);margin-bottom:40px}
+#entry-view .tagline{font-size:14px;color:var(--sub);margin-bottom:32px}
+.btn-kakao{width:100%;max-width:320px;padding:14px;border-radius:var(--radius-sm);background:var(--kakao);color:var(--kakao-text);font-size:15px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:8px;transition:transform .1s}
+.btn-kakao:active{transform:scale(0.98)}
+.btn-kakao svg{width:20px;height:20px}
+.divider{display:flex;align-items:center;gap:12px;width:100%;max-width:320px;margin:20px 0;color:var(--hint);font-size:12px}
+.divider .line{flex:1;height:1px;background:var(--border)}
 #entry-view .field{width:100%;max-width:320px;margin-bottom:16px}
 #entry-view .field label{display:block;font-size:12px;font-weight:500;color:var(--sub);margin-bottom:6px;text-align:left}
 #entry-view .field input{width:100%;padding:14px 16px;border:1.5px solid var(--border);border-radius:var(--radius-sm);font-size:15px;background:var(--card);transition:border-color .2s}
@@ -36,17 +42,23 @@ input,textarea,select{font-family:inherit;outline:none}
 .btn-primary:disabled{opacity:.4;cursor:default}
 #entry-view .hint{font-size:12px;color:var(--hint);margin-top:16px;line-height:1.6}
 
+/* Kakao profile on entry */
+.kakao-profile{display:flex;align-items:center;gap:12px;width:100%;max-width:320px;padding:14px 16px;background:var(--card);border:1.5px solid var(--accent);border-radius:var(--radius-sm);margin-bottom:16px}
+.kakao-profile img{width:40px;height:40px;border-radius:50%;object-fit:cover}
+.kakao-profile .info{text-align:left;flex:1}
+.kakao-profile .info .name{font-size:15px;font-weight:500}
+.kakao-profile .info .sub{font-size:12px;color:var(--accent)}
+
 /* Board */
 #board-view{display:none}
 .board-header{display:flex;justify-content:space-between;align-items:center;padding:20px 0 12px;position:sticky;top:0;background:var(--bg);z-index:10}
-.board-header .room-info{font-size:12px;color:var(--hint);background:var(--warm);padding:4px 10px;border-radius:20px}
+.board-header .room-info{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--hint);background:var(--warm);padding:4px 10px 4px 4px;border-radius:20px}
+.board-header .room-info img{width:22px;height:22px;border-radius:50%;object-fit:cover}
 
-/* Tabs */
 .tabs{display:flex;gap:4px;margin-bottom:20px;background:var(--warm);border-radius:var(--radius-sm);padding:3px}
 .tabs button{flex:1;padding:10px 0;border-radius:8px;font-size:13px;font-weight:500;color:var(--sub);transition:all .2s}
 .tabs button.active{background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.08)}
 
-/* Month nav */
 .month-nav{display:flex;align-items:center;gap:2px;margin-bottom:20px}
 .month-nav button{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--sub);transition:background .15s}
 .month-nav button:hover{background:var(--warm)}
@@ -61,13 +73,10 @@ input,textarea,select{font-family:inherit;outline:none}
 .stat-card .lbl{font-size:11px;color:var(--sub);margin-top:2px}
 
 .mission-list{display:flex;flex-direction:column;gap:12px;padding-bottom:80px}
-
-/* Section label for dashboard */
 .section-label{font-size:13px;font-weight:700;color:var(--sub);margin:20px 0 10px;display:flex;align-items:center;gap:8px}
 .section-label:first-child{margin-top:0}
 .section-label .line{flex:1;height:1px;background:var(--border)}
 
-/* Mission card */
 .m-card{background:var(--card);border-radius:var(--radius);padding:18px 20px;border:1.5px solid var(--border);transition:border-color .15s}
 .m-card:hover{border-color:#ccc}
 .m-card.past{opacity:.5}
@@ -93,8 +102,9 @@ input,textarea,select{font-family:inherit;outline:none}
 .m-card .act-btn{font-size:11px;color:var(--hint);padding:4px 10px;border-radius:6px;transition:background .15s}
 .m-card .act-btn:hover{background:var(--warm)}
 .m-card .act-btn.del:hover{background:var(--danger-bg);color:var(--danger)}
+.m-card .act-btn.kakao-share{color:var(--kakao-text);background:var(--kakao);border-radius:6px}
+.m-card .act-btn.kakao-share:hover{opacity:.85;background:var(--kakao)}
 
-/* Link preview */
 .link-preview{display:flex;gap:12px;margin-top:10px;padding:10px 12px;background:var(--bg);border-radius:var(--radius-sm);border:1px solid var(--border);text-decoration:none;color:inherit;transition:border-color .15s}
 .link-preview:hover{border-color:#ccc}
 .link-preview .lp-img{width:72px;height:72px;border-radius:8px;object-fit:cover;flex-shrink:0;background:var(--warm)}
@@ -135,14 +145,12 @@ input,textarea,select{font-family:inherit;outline:none}
 .preview-section .m-card{transition:opacity .3s}
 .preview-section .m-card.empty{opacity:.35}
 
-/* Edit overlay */
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:50;justify-content:center;align-items:flex-end}
 .overlay.show{display:flex}
 .overlay .sheet{background:var(--bg);border-radius:20px 20px 0 0;width:100%;max-width:480px;max-height:85dvh;overflow-y:auto;padding:28px 20px 40px;animation:slideUp .25s ease}
 @keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .overlay .sheet h3{font-size:17px;font-weight:700;margin-bottom:20px}
 
-/* Toast */
 .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-80px);background:var(--text);color:#fff;padding:12px 24px;border-radius:12px;font-size:13px;font-weight:500;z-index:100;transition:transform .3s ease;pointer-events:none}
 .toast.show{transform:translateX(-50%) translateY(0)}
 </style>
@@ -158,23 +166,46 @@ input,textarea,select{font-family:inherit;outline:none}
   </div>
   <h1>미션보드</h1>
   <p class="tagline">우리 단톡방의 월간 운동 미션</p>
-  <div class="field">
-    <label>닉네임</label>
-    <input type="text" id="inp-nick" placeholder="단톡방에서 쓰는 이름" maxlength="10" autocomplete="off">
+
+  <!-- Kakao profile (hidden by default, shown after kakao login) -->
+  <div id="kakao-profile-box" class="kakao-profile" style="display:none">
+    <img id="kakao-thumb" src="" alt="">
+    <div class="info">
+      <div class="name" id="kakao-name"></div>
+      <div class="sub">카카오 계정으로 로그인됨</div>
+    </div>
   </div>
+
+  <!-- Step 1: Kakao login or manual nickname -->
+  <div id="entry-step1">
+    <button class="btn-kakao" onclick="kakaoLogin()">
+      <svg viewBox="0 0 24 24" fill="var(--kakao-text)"><path d="M12 3C6.48 3 2 6.36 2 10.5c0 2.61 1.74 4.91 4.36 6.22-.14.52-.89 3.37-.93 3.58 0 0-.02.15.08.21.1.06.21.01.21.01.28-.04 3.24-2.14 3.75-2.5.82.12 1.68.18 2.53.18 5.52 0 10-3.36 10-7.5S17.52 3 12 3z"/></svg>
+      카카오로 시작하기
+    </button>
+    <div class="divider"><span class="line"></span>또는<span class="line"></span></div>
+    <div class="field">
+      <label>닉네임 직접 입력</label>
+      <input type="text" id="inp-nick" placeholder="단톡방에서 쓰는 이름" maxlength="10" autocomplete="off">
+    </div>
+  </div>
+
+  <!-- Room code (always visible) -->
   <div class="field">
     <label>방 코드</label>
     <input type="text" id="inp-room" placeholder="단톡방 공용 코드" maxlength="20" autocomplete="off">
   </div>
   <button class="btn-primary" id="btn-enter" onclick="enterRoom()" disabled>입장하기</button>
-  <p class="hint">방 코드가 없으면 새로운 방이 만들어져요.<br>같은 코드를 쓰는 사람끼리 미션을 공유합니다.</p>
+  <p class="hint">카카오 로그인하면 프로필이 자동으로 연동돼요.<br>같은 방 코드를 쓰는 사람끼리 미션을 공유합니다.</p>
 </div>
 
 <!-- BOARD -->
 <div id="board-view" class="container">
   <div class="board-header">
     <span class="room-info" id="room-badge"></span>
-    <button style="font-size:13px;color:var(--sub);padding:6px 12px;border-radius:8px;border:1px solid var(--border)" onclick="logout()">나가기</button>
+    <div style="display:flex;gap:6px">
+      <button style="font-size:13px;color:var(--accent);padding:6px 12px;border-radius:8px;border:1px solid var(--accent-bg);background:var(--accent-bg)" onclick="shareLink()">초대 링크</button>
+      <button style="font-size:13px;color:var(--sub);padding:6px 12px;border-radius:8px;border:1px solid var(--border)" onclick="logout()">나가기</button>
+    </div>
   </div>
 
   <div class="tabs">
@@ -182,7 +213,6 @@ input,textarea,select{font-family:inherit;outline:none}
     <button id="tab-month" onclick="switchTab('month')">월별 보기</button>
   </div>
 
-  <!-- Dashboard Tab -->
   <div id="dash-content">
     <div class="stats">
       <div class="stat-card"><div class="num" id="st-upcoming">0</div><div class="lbl">다가오는</div></div>
@@ -192,7 +222,6 @@ input,textarea,select{font-family:inherit;outline:none}
     <div class="mission-list" id="dash-list"></div>
   </div>
 
-  <!-- Monthly Tab -->
   <div id="month-content" style="display:none">
     <div class="month-nav">
       <button onclick="changeMonth(-1)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M15 18l-6-6 6-6"/></svg></button>
@@ -279,6 +308,9 @@ input,textarea,select{font-family:inherit;outline:none}
 </div>
 
 <script>
+// ===== Kakao SDK Init =====
+Kakao.init('ce170e14601cd8e467c2eb57611d43f5');
+
 const DAYS = ['일','월','화','수','목','금','토'];
 const COLORS = [
   {bg:'#E1F5EE',fg:'#085041'},{bg:'#E6F1FB',fg:'#0C447C'},{bg:'#FAEEDA',fg:'#633806'},
@@ -286,55 +318,118 @@ const COLORS = [
   {bg:'#EAF3DE',fg:'#27500A'},{bg:'#FCEBEB',fg:'#791F1F'}
 ];
 
-let state = { nickname:'', room:'', year:2026, month:4, missions:[], currentTab:'dash' };
+let state = { nickname:'', room:'', year:2026, month:4, missions:[], currentTab:'dash', profileImg:'' };
 
-// ===== 1) Persistent login via localStorage =====
-const saved = localStorage.getItem('mb_session');
-if (saved) {
-  try { const s = JSON.parse(saved); state.nickname = s.nickname; state.room = s.room; } catch(e) {}
+// ===== Login priority: URL > localStorage > manual =====
+const urlParams = new URLSearchParams(window.location.search);
+const urlRoom = urlParams.get('room');
+const urlNick = urlParams.get('nick');
+
+if (urlRoom && urlNick) {
+  state.room = urlRoom.trim();
+  state.nickname = urlNick.trim();
+  localStorage.setItem('mb_session', JSON.stringify({ nickname: state.nickname, room: state.room, profileImg: '' }));
+  window.history.replaceState({}, '', window.location.pathname);
+} else {
+  const saved = localStorage.getItem('mb_session');
+  if (saved) {
+    try {
+      const s = JSON.parse(saved);
+      state.nickname = s.nickname;
+      state.room = s.room;
+      state.profileImg = s.profileImg || '';
+    } catch(e) {}
+  }
 }
 
 const now = new Date();
 state.year = now.getFullYear();
 state.month = now.getMonth() + 1;
 
-if (state.nickname && state.room) showBoard();
+if (state.nickname && state.room) {
+  fetch('/api/rooms/enter', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ code: state.room, nickname: state.nickname })
+  }).then(function(){ showBoard(); }).catch(function(){ showBoard(); });
+} else {
+  if (urlRoom) document.getElementById('inp-room').value = urlRoom;
+  if (urlNick) document.getElementById('inp-nick').value = urlNick;
+  validateEntry();
+}
 
 document.getElementById('inp-nick').addEventListener('input', validateEntry);
 document.getElementById('inp-room').addEventListener('input', validateEntry);
-['inp-nick','inp-room'].forEach(id => {
-  document.getElementById(id).addEventListener('keydown', e => { if (e.key === 'Enter') enterRoom(); });
+['inp-nick','inp-room'].forEach(function(id) {
+  document.getElementById(id).addEventListener('keydown', function(e) { if (e.key === 'Enter') enterRoom(); });
 });
 
 function validateEntry() {
-  const nick = document.getElementById('inp-nick').value.trim();
-  const room = document.getElementById('inp-room').value.trim();
-  document.getElementById('btn-enter').disabled = !(nick && room);
+  var nick = document.getElementById('inp-nick').value.trim();
+  var room = document.getElementById('inp-room').value.trim();
+  // If kakao logged in, nickname is already set
+  var hasNick = state.nickname || nick;
+  document.getElementById('btn-enter').disabled = !(hasNick && room);
+}
+
+// ===== Kakao Login =====
+function kakaoLogin() {
+  Kakao.Auth.login({
+    success: function() {
+      Kakao.API.request({
+        url: '/v2/user/me',
+        success: function(res) {
+          var profile = res.kakao_account && res.kakao_account.profile;
+          if (profile) {
+            state.nickname = (profile.nickname || '').substring(0, 10);
+            state.profileImg = profile.thumbnail_image_url || profile.profile_image_url || '';
+
+            // Show profile, hide manual input
+            document.getElementById('entry-step1').style.display = 'none';
+            var box = document.getElementById('kakao-profile-box');
+            box.style.display = 'flex';
+            document.getElementById('kakao-thumb').src = state.profileImg || '';
+            document.getElementById('kakao-name').textContent = state.nickname;
+            validateEntry();
+          }
+        },
+        fail: function() { toast('\uD504\uB85C\uD544 \uC815\uBCF4\uB97C \uAC00\uC838\uC62C \uC218 \uC5C6\uC5B4\uC694.'); }
+      });
+    },
+    fail: function() { toast('\uCE74\uCE74\uC624 \uB85C\uADF8\uC778\uC5D0 \uC2E4\uD328\uD588\uC5B4\uC694.'); }
+  });
 }
 
 async function enterRoom() {
-  const nickname = document.getElementById('inp-nick').value.trim();
-  const room = document.getElementById('inp-room').value.trim();
-  if (!nickname || !room) return;
+  var nick = state.nickname || document.getElementById('inp-nick').value.trim();
+  var room = document.getElementById('inp-room').value.trim();
+  if (!nick || !room) return;
   try {
-    const res = await fetch('/api/rooms/enter', {
+    var res = await fetch('/api/rooms/enter', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ code: room, nickname })
+      body: JSON.stringify({ code: room, nickname: nick })
     });
-    const data = await res.json();
+    var data = await res.json();
     if (!res.ok) return toast(data.error);
-    state.nickname = nickname;
+    state.nickname = nick;
     state.room = room;
-    localStorage.setItem('mb_session', JSON.stringify({ nickname, room }));
+    localStorage.setItem('mb_session', JSON.stringify({ nickname: nick, room: room, profileImg: state.profileImg }));
     showBoard();
-  } catch(e) { toast('연결에 실패했어요.'); }
+  } catch(e) { toast('\uC5F0\uACB0\uC5D0 \uC2E4\uD328\uD588\uC5B4\uC694.'); }
 }
 
 function logout() {
   localStorage.removeItem('mb_session');
-  state.nickname = ''; state.room = '';
+  if (Kakao.Auth.getAccessToken()) {
+    Kakao.Auth.logout(function(){});
+  }
+  state.nickname = ''; state.room = ''; state.profileImg = '';
   document.getElementById('board-view').style.display = 'none';
   document.getElementById('entry-view').style.display = 'flex';
+  // Reset entry UI
+  document.getElementById('entry-step1').style.display = 'block';
+  document.getElementById('kakao-profile-box').style.display = 'none';
+  document.getElementById('inp-nick').value = '';
+  document.getElementById('inp-room').value = '';
 }
 
 // ===== Tab switching =====
@@ -348,30 +443,35 @@ function switchTab(tab) {
   else loadMissions();
 }
 
-// ===== Board =====
 function showBoard() {
   document.getElementById('entry-view').style.display = 'none';
   document.getElementById('register-view').style.display = 'none';
   document.getElementById('board-view').style.display = 'block';
-  document.getElementById('room-badge').textContent = state.room + ' \u00B7 ' + state.nickname;
+  // Room badge with profile image
+  var badge = document.getElementById('room-badge');
+  if (state.profileImg) {
+    badge.innerHTML = '<img src="'+escHtml(state.profileImg)+'" alt="">' + escHtml(state.room) + ' \u00B7 ' + escHtml(state.nickname);
+  } else {
+    badge.textContent = state.room + ' \u00B7 ' + state.nickname;
+  }
   renderMonth();
   if (state.currentTab === 'dash') loadDashboard();
   else loadMissions();
 }
 
-// ===== 2) Dashboard — all upcoming missions =====
+// ===== Dashboard =====
 async function loadDashboard() {
   try {
-    const res = await fetch('/api/rooms/' + encodeURIComponent(state.room) + '/upcoming');
-    const data = await res.json();
+    var res = await fetch('/api/rooms/' + encodeURIComponent(state.room) + '/upcoming');
+    var data = await res.json();
     renderDashboard(data.upcoming || [], data.past || []);
-  } catch(e) { toast('미션을 불러올 수 없어요.'); }
+  } catch(e) { toast('\uBBF8\uC158\uC744 \uBD88\uB7EC\uC62C \uC218 \uC5C6\uC5B4\uC694.'); }
 }
 
 function renderDashboard(upcoming, past) {
-  const list = document.getElementById('dash-list');
-  let totalP = 0, myP = 0;
-  upcoming.concat(past).forEach(m => {
+  var list = document.getElementById('dash-list');
+  var totalP = 0, myP = 0;
+  upcoming.concat(past).forEach(function(m) {
     totalP += m.participants.length;
     if (m.participants.includes(state.nickname)) myP++;
   });
@@ -380,24 +480,23 @@ function renderDashboard(upcoming, past) {
   document.getElementById('st-my-p').textContent = myP;
 
   if (upcoming.length === 0 && past.length === 0) {
-    list.innerHTML = '<div class="empty-state"><div class="icon">&#9898;</div><p>아직 등록된 미션이 없어요.<br>첫 미션을 등록해보세요!</p></div>';
+    list.innerHTML = '<div class="empty-state"><div class="icon">&#9898;</div><p>\uC544\uC9C1 \uB4F1\uB85D\uB41C \uBBF8\uC158\uC774 \uC5C6\uC5B4\uC694.<br>\uCCAB \uBBF8\uC158\uC744 \uB4F1\uB85D\uD574\uBCF4\uC138\uC694!</p></div>';
     return;
   }
-
-  let html = '';
+  var html = '';
   if (upcoming.length > 0) {
-    html += '<div class="section-label">다가오는 미션 <span class="line"></span></div>';
-    html += upcoming.map(m => buildCard(m, false)).join('');
+    html += '<div class="section-label">\uB2E4\uAC00\uC624\uB294 \uBBF8\uC158 <span class="line"></span></div>';
+    html += upcoming.map(function(m){ return buildCard(m, false); }).join('');
   }
   if (past.length > 0) {
-    html += '<div class="section-label">지난 미션 <span class="line"></span></div>';
-    html += past.map(m => buildCard(m, true)).join('');
+    html += '<div class="section-label">\uC9C0\uB09C \uBBF8\uC158 <span class="line"></span></div>';
+    html += past.map(function(m){ return buildCard(m, true); }).join('');
   }
   list.innerHTML = html;
   loadAllLinkPreviews(list);
 }
 
-// ===== Monthly view =====
+// ===== Monthly =====
 function changeMonth(dir) {
   state.month += dir;
   if (state.month > 12) { state.month = 1; state.year++; }
@@ -413,30 +512,28 @@ function renderMonth() {
 
 async function loadMissions() {
   try {
-    const res = await fetch('/api/rooms/' + encodeURIComponent(state.room) + '/missions?year=' + state.year + '&month=' + state.month);
-    const data = await res.json();
+    var res = await fetch('/api/rooms/' + encodeURIComponent(state.room) + '/missions?year=' + state.year + '&month=' + state.month);
+    var data = await res.json();
     state.missions = data.missions || [];
     renderMissions();
-  } catch(e) { toast('미션을 불러올 수 없어요.'); }
+  } catch(e) { toast('\uBBF8\uC158\uC744 \uBD88\uB7EC\uC62C \uC218 \uC5C6\uC5B4\uC694.'); }
 }
 
 function renderMissions() {
-  const list = document.getElementById('mission-list');
-  const today = new Date(); today.setHours(0,0,0,0);
-
+  var list = document.getElementById('mission-list');
+  var today = new Date(); today.setHours(0,0,0,0);
   if (state.missions.length === 0) {
-    list.innerHTML = '<div class="empty-state"><div class="icon">&#9898;</div><p>이 달에 등록된 미션이 없어요.</p></div>';
+    list.innerHTML = '<div class="empty-state"><div class="icon">&#9898;</div><p>\uC774 \uB2EC\uC5D0 \uB4F1\uB85D\uB41C \uBBF8\uC158\uC774 \uC5C6\uC5B4\uC694.</p></div>';
   } else {
-    list.innerHTML = state.missions.map(m => {
-      const d = new Date(m.event_date + 'T00:00:00');
-      const diff = Math.round((d - today) / 86400000);
+    list.innerHTML = state.missions.map(function(m) {
+      var d = new Date(m.event_date + 'T00:00:00');
+      var diff = Math.round((d - today) / 86400000);
       return buildCard(m, diff < 0);
     }).join('');
     loadAllLinkPreviews(list);
   }
-
-  let totalJoins = 0, myJoins = 0;
-  state.missions.forEach(m => {
+  var totalJoins = 0, myJoins = 0;
+  state.missions.forEach(function(m) {
     totalJoins += m.participants.length;
     if (m.participants.includes(state.nickname)) myJoins++;
   });
@@ -445,27 +542,31 @@ function renderMissions() {
   document.getElementById('st-mine').textContent = myJoins;
 }
 
-// ===== Shared card builder =====
+// ===== Card builder =====
 function buildCard(m, isPast) {
-  const today = new Date(); today.setHours(0,0,0,0);
-  const d = new Date(m.event_date + 'T00:00:00');
-  const diff = Math.round((d - today) / 86400000);
-  const dateStr = (d.getMonth()+1) + '/' + d.getDate() + ' (' + DAYS[d.getDay()] + ')';
-  const dday = diff > 0 ? 'D-' + diff : diff === 0 ? 'D-Day' : '\uC885\uB8CC';
-  const ddayClass = diff < 0 ? 'over' : '';
-  const isJoined = m.participants.includes(state.nickname);
-  const isOwner = m.owner === state.nickname;
+  var today = new Date(); today.setHours(0,0,0,0);
+  var d = new Date(m.event_date + 'T00:00:00');
+  var diff = Math.round((d - today) / 86400000);
+  var dateStr = (d.getMonth()+1) + '/' + d.getDate() + ' (' + DAYS[d.getDay()] + ')';
+  var dday = diff > 0 ? 'D-' + diff : diff === 0 ? 'D-Day' : '\uC885\uB8CC';
+  var ddayClass = diff < 0 ? 'over' : '';
+  var isJoined = m.participants.includes(state.nickname);
+  var isOwner = m.owner === state.nickname;
 
-  const avatars = m.participants.map((p, i) => {
-    const c = COLORS[hashCode(p) % COLORS.length];
+  var avatars = m.participants.map(function(p, i) {
+    var c = COLORS[hashCode(p) % COLORS.length];
     return '<div class="av" style="background:'+c.bg+';color:'+c.fg+(i>0?';margin-left:-8px':'')+'">'+p.charAt(0)+'</div>';
   }).join('');
 
-  const descTextHtml = m.description ? '<div class="desc">'+linkify(escHtml(m.description))+'</div>' : '';
-  const linkPreviewHtml = extractFirstURL(m.description) ? '<div class="lp-slot" data-url="'+escHtml(extractFirstURL(m.description))+'"><div class="link-preview"><span class="lp-loading">링크 미리보기 불러오는 중...</span></div></div>' : '';
-  const ownerActions = isOwner ? '<div class="actions"><button class="act-btn" onclick="openEdit(\''+m.id+'\')">수정</button><button class="act-btn del" onclick="deleteMission(\''+m.id+'\')">삭제</button></div>' : '';
+  var descTextHtml = m.description ? '<div class="desc">'+linkify(escHtml(m.description))+'</div>' : '';
+  var firstUrl = extractFirstURL(m.description);
+  var linkPreviewHtml = firstUrl ? '<div class="lp-slot" data-url="'+escHtml(firstUrl)+'"><div class="link-preview"><span class="lp-loading">\uB9C1\uD06C \uBBF8\uB9AC\uBCF4\uAE30 \uBD88\uB7EC\uC624\uB294 \uC911...</span></div></div>' : '';
 
-  return '<div class="m-card'+(isPast?' past':'')+'">' +
+  var ownerActions = isOwner
+    ? '<div class="actions"><button class="act-btn kakao-share" onclick="kakaoShare(\''+m.id+'\')">카톡 공유</button><button class="act-btn" onclick="openEdit(\''+m.id+'\')">수정</button><button class="act-btn del" onclick="deleteMission(\''+m.id+'\')">삭제</button></div>'
+    : '<div class="actions"><button class="act-btn kakao-share" onclick="kakaoShare(\''+m.id+'\')">카톡 공유</button></div>';
+
+  return '<div class="m-card'+(isPast?' past':'')+'" data-id="'+m.id+'" data-title="'+escHtml(m.title)+'" data-desc="'+escHtml(m.description||'')+'" data-date="'+m.event_date+'" data-owner="'+escHtml(m.owner)+'" data-participants="'+m.participants.length+'">' +
     '<div class="date-row"><span class="date-pill">'+dateStr+'</span><span class="dday '+ddayClass+'">'+dday+'</span></div>' +
     '<div class="title">'+escHtml(m.title)+'</div>' +
     '<div class="owner">\uBBF8\uC158\uC624\uB108: '+escHtml(m.owner)+'</div>' +
@@ -475,60 +576,87 @@ function buildCard(m, isPast) {
     ownerActions + '</div>';
 }
 
-// ===== 3) Link preview =====
-const ogCache = {};
+// ===== KakaoTalk Share =====
+function kakaoShare(missionId) {
+  var card = document.querySelector('.m-card[data-id="'+missionId+'"]');
+  if (!card) return;
+  var title = card.dataset.title;
+  var desc = card.dataset.desc || '';
+  var date = card.dataset.date;
+  var owner = card.dataset.owner;
+  var pCount = card.dataset.participants;
+  var d = new Date(date + 'T00:00:00');
+  var dateStr = (d.getMonth()+1) + '/' + d.getDate() + ' (' + DAYS[d.getDay()] + ')';
 
-function extractFirstURL(text) {
-  if (!text) return null;
-  const m = text.match(/https?:\/\/[^\s]+/);
-  return m ? m[0] : null;
+  var shareDesc = dateStr + ' | \uBBF8\uC158\uC624\uB108: ' + owner + ' | ' + pCount + '\uBA85 \uCC38\uC5EC\uC911';
+  if (desc) shareDesc = desc.substring(0, 50) + '\n' + shareDesc;
+
+  Kakao.Share.sendDefault({
+    objectType: 'feed',
+    content: {
+      title: '\uD83C\uDFC3 ' + title,
+      description: shareDesc,
+      imageUrl: 'https://mmission-production.up.railway.app/og-image.png',
+      link: {
+        mobileWebUrl: window.location.origin,
+        webUrl: window.location.origin
+      }
+    },
+    buttons: [{
+      title: '\uBBF8\uC158\uBCF4\uB4DC \uC5F4\uAE30',
+      link: {
+        mobileWebUrl: window.location.origin,
+        webUrl: window.location.origin
+      }
+    }]
+  });
 }
 
+// ===== Link preview =====
+var ogCache = {};
+function extractFirstURL(text) {
+  if (!text) return null;
+  var m = text.match(/https?:\/\/[^\s]+/);
+  return m ? m[0] : null;
+}
 async function fetchOG(url) {
   if (ogCache[url]) return ogCache[url];
   try {
-    const res = await fetch('/api/og?url=' + encodeURIComponent(url));
-    const data = await res.json();
+    var res = await fetch('/api/og?url=' + encodeURIComponent(url));
+    var data = await res.json();
     ogCache[url] = data;
     return data;
   } catch(e) { return null; }
 }
-
 function loadAllLinkPreviews(container) {
-  const slots = container.querySelectorAll('.lp-slot');
-  slots.forEach(async (slot) => {
-    const url = slot.dataset.url;
+  var slots = container.querySelectorAll('.lp-slot');
+  slots.forEach(async function(slot) {
+    var url = slot.dataset.url;
     if (!url) return;
-    const og = await fetchOG(url);
-    if (!og || (!og.title && !og.image)) {
-      slot.remove();
-      return;
-    }
-    const imgHtml = og.image ? '<img class="lp-img" src="'+escHtml(og.image)+'" onerror="this.style.display=\'none\'" alt="">' : '';
-    const siteHost = (() => { try { return new URL(url).hostname; } catch(e) { return ''; } })();
-    slot.innerHTML = '<a class="link-preview" href="'+escHtml(url)+'" target="_blank" rel="noopener">' +
-      imgHtml +
-      '<div class="lp-body">' +
-        (og.title ? '<div class="lp-title">'+escHtml(og.title)+'</div>' : '') +
-        (og.description ? '<div class="lp-desc">'+escHtml(og.description)+'</div>' : '') +
-        '<div class="lp-site">'+(og.site_name || siteHost)+'</div>' +
-      '</div></a>';
+    var og = await fetchOG(url);
+    if (!og || (!og.title && !og.image)) { slot.remove(); return; }
+    var imgHtml = og.image ? '<img class="lp-img" src="'+escHtml(og.image)+'" onerror="this.style.display=\'none\'" alt="">' : '';
+    var siteHost = ''; try { siteHost = new URL(url).hostname; } catch(e) {}
+    slot.innerHTML = '<a class="link-preview" href="'+escHtml(url)+'" target="_blank" rel="noopener">'+imgHtml+
+      '<div class="lp-body">'+(og.title?'<div class="lp-title">'+escHtml(og.title)+'</div>':'')+
+      (og.description?'<div class="lp-desc">'+escHtml(og.description)+'</div>':'')+
+      '<div class="lp-site">'+(og.site_name||siteHost)+'</div></div></a>';
   });
 }
 
 // ===== Join / Leave =====
 async function toggleJoin(id, isJoined) {
-  const endpoint = isJoined ? 'leave' : 'join';
+  var endpoint = isJoined ? 'leave' : 'join';
   try {
-    const res = await fetch('/api/rooms/' + encodeURIComponent(state.room) + '/missions/' + id + '/' + endpoint, {
+    var res = await fetch('/api/rooms/' + encodeURIComponent(state.room) + '/missions/' + id + '/' + endpoint, {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ nickname: state.nickname })
     });
-    const data = await res.json();
+    var data = await res.json();
     if (!res.ok) return toast(data.error);
     if (state.currentTab === 'dash') loadDashboard();
     else loadMissions();
-  } catch(e) { toast('처리에 실패했어요.'); }
+  } catch(e) { toast('\uCC98\uB9AC\uC5D0 \uC2E4\uD328\uD588\uC5B4\uC694.'); }
 }
 
 // ===== Register =====
@@ -548,85 +676,65 @@ function showRegister() {
 }
 
 function updateRegPreview() {
-  const title = document.getElementById('reg-title').value;
-  const desc = document.getElementById('reg-desc').value;
-  const dateVal = document.getElementById('reg-date').value;
-
+  var title = document.getElementById('reg-title').value;
+  var desc = document.getElementById('reg-desc').value;
+  var dateVal = document.getElementById('reg-date').value;
   document.getElementById('reg-tc').textContent = title.length;
   document.getElementById('reg-dc').textContent = desc.length;
   document.getElementById('pv-title').textContent = title || '\uBBF8\uC158 \uC81C\uBAA9\uC744 \uC785\uB825\uD558\uC138\uC694';
-
-  const pvDesc = document.getElementById('pv-desc');
+  var pvDesc = document.getElementById('pv-desc');
   if (desc) { pvDesc.textContent = desc; pvDesc.style.display = 'block'; }
   else { pvDesc.style.display = 'none'; }
-
   if (dateVal) {
-    const d = new Date(dateVal + 'T00:00:00');
+    var d = new Date(dateVal + 'T00:00:00');
     document.getElementById('pv-date').textContent = (d.getMonth()+1) + '/' + d.getDate() + ' (' + DAYS[d.getDay()] + ')';
-    const today = new Date(); today.setHours(0,0,0,0);
-    const diff = Math.round((d - today) / 86400000);
+    var today = new Date(); today.setHours(0,0,0,0);
+    var diff = Math.round((d - today) / 86400000);
     document.getElementById('pv-dday').textContent = diff > 0 ? 'D-' + diff : diff === 0 ? 'D-Day' : '\uC885\uB8CC';
   } else {
     document.getElementById('pv-date').textContent = '\uB0A0\uC9DC \uBBF8\uC815';
     document.getElementById('pv-dday').textContent = '';
   }
-
-  const valid = title.trim() && dateVal;
+  var valid = title.trim() && dateVal;
   document.getElementById('reg-preview').classList.toggle('empty', !valid);
   document.getElementById('btn-submit').disabled = !valid;
 }
 
 async function submitMission() {
-  const title = document.getElementById('reg-title').value.trim();
-  const description = document.getElementById('reg-desc').value.trim();
-  const event_date = document.getElementById('reg-date').value;
+  var title = document.getElementById('reg-title').value.trim();
+  var description = document.getElementById('reg-desc').value.trim();
+  var event_date = document.getElementById('reg-date').value;
   if (!title || !event_date) return;
-
   try {
-    const res = await fetch('/api/rooms/' + encodeURIComponent(state.room) + '/missions', {
+    var res = await fetch('/api/rooms/' + encodeURIComponent(state.room) + '/missions', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ title, description, event_date, owner: state.nickname })
+      body: JSON.stringify({ title: title, description: description, event_date: event_date, owner: state.nickname })
     });
-    const data = await res.json();
+    var data = await res.json();
     if (!res.ok) return toast(data.error);
-
-    const d = new Date(event_date + 'T00:00:00');
+    var d = new Date(event_date + 'T00:00:00');
     state.year = d.getFullYear();
     state.month = d.getMonth() + 1;
-
     toast('\uBBF8\uC158\uC774 \uB4F1\uB85D\uB418\uC5C8\uC5B4\uC694!');
     showBoard();
+    // Prompt kakao share after creation
+    setTimeout(function() {
+      if (Kakao.isInitialized() && confirm('\uCE74\uCE74\uC624\uD1A1\uC73C\uB85C \uBBF8\uC158\uC744 \uACF5\uC720\uD560\uAE4C\uC694?')) {
+        kakaoShare(data.mission.id);
+      }
+    }, 500);
   } catch(e) { toast('\uB4F1\uB85D\uC5D0 \uC2E4\uD328\uD588\uC5B4\uC694.'); }
 }
 
 // ===== Edit / Delete =====
-function openEdit(id) {
-  const findIn = state.currentTab === 'dash' ? null : state.missions;
-  let m = null;
-  if (findIn) m = findIn.find(x => x.id === id);
-  if (!m) {
-    // fetch from server for dashboard mode
-    fetch('/api/rooms/' + encodeURIComponent(state.room) + '/missions?year=2020&month=1')
-    // Simpler: just search all missions on dashboard load
-  }
-  // Quick approach: store missions globally for both tabs
-  if (!m) {
-    // search in dash
-    const cards = document.querySelectorAll('.m-card');
-    // Fallback: refetch
-  }
-  // Simplified: always refetch for edit
-  fetchMissionForEdit(id);
-}
+function openEdit(id) { fetchMissionForEdit(id); }
 
 async function fetchMissionForEdit(id) {
-  // Get the mission data from the DOM-stored id
-  // Actually let's just load all and find it
   try {
-    const res = await fetch('/api/rooms/' + encodeURIComponent(state.room) + '/upcoming');
-    const data = await res.json();
-    const all = (data.upcoming || []).concat(data.past || []);
-    const m = all.find(x => x.id === id);
+    var res = await fetch('/api/rooms/' + encodeURIComponent(state.room) + '/upcoming');
+    var data = await res.json();
+    var all = (data.upcoming || []).concat(data.past || []);
+    var m = all.find(function(x){ return x.id === id; });
     if (!m) return toast('\uBBF8\uC158\uC744 \uCC3E\uC744 \uC218 \uC5C6\uC5B4\uC694.');
     document.getElementById('edit-id').value = id;
     document.getElementById('edit-title').value = m.title;
@@ -635,22 +743,20 @@ async function fetchMissionForEdit(id) {
     document.getElementById('edit-overlay').classList.add('show');
   } catch(e) { toast('\uBBF8\uC158 \uC815\uBCF4\uB97C \uBD88\uB7EC\uC62C \uC218 \uC5C6\uC5B4\uC694.'); }
 }
-
 function closeEdit() { document.getElementById('edit-overlay').classList.remove('show'); }
 
 async function saveEdit() {
-  const id = document.getElementById('edit-id').value;
-  const title = document.getElementById('edit-title').value.trim();
-  const description = document.getElementById('edit-desc').value.trim();
-  const event_date = document.getElementById('edit-date').value;
+  var id = document.getElementById('edit-id').value;
+  var title = document.getElementById('edit-title').value.trim();
+  var description = document.getElementById('edit-desc').value.trim();
+  var event_date = document.getElementById('edit-date').value;
   if (!title || !event_date) return toast('\uC81C\uBAA9\uACFC \uB0A0\uC9DC\uB97C \uC785\uB825\uD574\uC8FC\uC138\uC694.');
-
   try {
-    const res = await fetch('/api/rooms/' + encodeURIComponent(state.room) + '/missions/' + id, {
+    var res = await fetch('/api/rooms/' + encodeURIComponent(state.room) + '/missions/' + id, {
       method:'PUT', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ title, description, event_date, owner: state.nickname })
+      body: JSON.stringify({ title: title, description: description, event_date: event_date, owner: state.nickname })
     });
-    const data = await res.json();
+    var data = await res.json();
     if (!res.ok) return toast(data.error);
     closeEdit();
     toast('\uC218\uC815\uB418\uC5C8\uC5B4\uC694!');
@@ -662,11 +768,11 @@ async function saveEdit() {
 async function deleteMission(id) {
   if (!confirm('\uC774 \uBBF8\uC158\uC744 \uC0AD\uC81C\uD560\uAE4C\uC694?')) return;
   try {
-    const res = await fetch('/api/rooms/' + encodeURIComponent(state.room) + '/missions/' + id, {
+    var res = await fetch('/api/rooms/' + encodeURIComponent(state.room) + '/missions/' + id, {
       method:'DELETE', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ owner: state.nickname })
     });
-    const data = await res.json();
+    var data = await res.json();
     if (!res.ok) return toast(data.error);
     toast('\uC0AD\uC81C\uB418\uC5C8\uC5B4\uC694.');
     if (state.currentTab === 'dash') loadDashboard();
@@ -674,15 +780,31 @@ async function deleteMission(id) {
   } catch(e) { toast('\uC0AD\uC81C\uC5D0 \uC2E4\uD328\uD588\uC5B4\uC694.'); }
 }
 
+// ===== Share link =====
+function shareLink() {
+  var base = window.location.origin + window.location.pathname;
+  var link = base + '?room=' + encodeURIComponent(state.room);
+  var text = '\uD83C\uDFC3 \uBBF8\uC158\uBCF4\uB4DC \uC785\uC7A5\uD558\uAE30\n' + link;
+  if (navigator.share) {
+    navigator.share({ title: '\uBBF8\uC158\uBCF4\uB4DC', text: text }).catch(function(){});
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(function() {
+      toast('\uCD08\uB300 \uB9C1\uD06C\uAC00 \uBCF5\uC0AC\uB418\uC5C8\uC5B4\uC694!');
+    });
+  } else {
+    prompt('\uC544\uB798 \uB9C1\uD06C\uB97C \uBCF5\uC0AC\uD574\uC11C \uCE74\uD1A1\uBC29\uC5D0 \uACF5\uC720\uD558\uC138\uC694:', text);
+  }
+}
+
 // ===== Helpers =====
-function escHtml(s) { const el = document.createElement('span'); el.textContent = s; return el.innerHTML; }
+function escHtml(s) { var el = document.createElement('span'); el.textContent = s; return el.innerHTML; }
 function linkify(text) { return text.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>'); }
-function hashCode(s) { let h = 0; for (let i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0; return Math.abs(h); }
+function hashCode(s) { var h = 0; for (var i = 0; i < s.length; i++) h = ((h << 5) - h + s.charCodeAt(i)) | 0; return Math.abs(h); }
 function toast(msg) {
-  const el = document.getElementById('toast');
+  var el = document.getElementById('toast');
   el.textContent = msg;
   el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 2500);
+  setTimeout(function(){ el.classList.remove('show'); }, 2500);
 }
 </script>
 </body>
